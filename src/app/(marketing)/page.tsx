@@ -1,17 +1,29 @@
-import { ScrollReveal } from '@/components/animations/ScrollReveal';
+import dynamic from 'next/dynamic';
+
+const HeroScene = dynamic(
+  () => import('@/components/sections/HeroScene').then(m => ({ default: m.HeroScene })),
+  { ssr: false }
+);
+const DeconstructedScene = dynamic(
+  () => import('@/components/sections/DeconstructedScene').then(m => ({ default: m.DeconstructedScene })),
+  { ssr: false }
+);
+const NetworkGridScene = dynamic(
+  () => import('@/components/sections/NetworkGridScene').then(m => ({ default: m.NetworkGridScene })),
+  { ssr: false }
+);
+const EnterpriseAnchorScene = dynamic(
+  () => import('@/components/sections/EnterpriseAnchorScene').then(m => ({ default: m.EnterpriseAnchorScene })),
+  { ssr: false }
+);
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <ScrollReveal animation="fade-up">
-          <h1 className="text-6xl font-bold tracking-tight text-white">Ales</h1>
-          <p className="mt-4 max-w-xl text-lg text-neutral-400">
-            Enterprise hardware solutions for businesses in TRNC. Cameras, access points, laptops
-            — sourced and supported locally.
-          </p>
-        </ScrollReveal>
-      </section>
+    <div className="bg-[#0A0A0F] text-white">
+      <HeroScene />
+      <DeconstructedScene />
+      <NetworkGridScene />
+      <EnterpriseAnchorScene />
     </div>
   );
 }
