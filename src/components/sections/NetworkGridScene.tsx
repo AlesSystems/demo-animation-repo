@@ -5,32 +5,71 @@ import { gsap } from '@/lib/animations/gsap-config';
 import { designTokens } from '@/lib/design-tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-const { colors, animation } = designTokens;
+const { colors, animation, typography } = designTokens;
 
-// City node data
-const CITIES = [
-  { id: 'lefkosa', name: 'Lefkoşa', cx: 400, cy: 200, icon: 'laptop' },
-  { id: 'girne', name: 'Girne', cx: 330, cy: 148, icon: 'camera' },
-  { id: 'gazimagusa', name: 'Gazimağusa', cx: 640, cy: 195, icon: 'accesspoint' },
-] as const;
+// ── Types ──────────────────────────────────────────────────────────────────────
+interface CityConfig {
+  id: string;
+  name: string;
+  cx: number;
+  cy: number;
+  icon: 'laptop' | 'camera' | 'accesspoint';
+  // Label
+  labelX: number;
+  labelY: number;
+  labelAnchor: 'start' | 'middle' | 'end';
+  // Connector line from node edge to label
+  connectorX1: number;
+  connectorY1: number;
+  connectorX2: number;
+  connectorY2: number;
+  // Product icon anchor
+  iconX: number;
+  iconY: number;
+}
 
-// Connection line data
+// ── City definitions ───────────────────────────────────────────────────────────
+const CITIES: CityConfig[] = [
+  {
+    id: 'lefkosa',
+    name: 'Lefkoşa',
+    cx: 400, cy: 200,
+    icon: 'laptop',
+    labelX: 382, labelY: 226, labelAnchor: 'end',
+    connectorX1: 394, connectorY1: 206, connectorX2: 386, connectorY2: 219,
+    iconX: 432, iconY: 172,
+  },
+  {
+    id: 'girne',
+    name: 'Girne',
+    cx: 330, cy: 148,
+    icon: 'camera',
+    labelX: 313, labelY: 130, labelAnchor: 'end',
+    connectorX1: 325, connectorY1: 143, connectorX2: 317, connectorY2: 134,
+    iconX: 298, iconY: 115,
+  },
+  {
+    id: 'gazimagusa',
+    name: 'Gazimağusa',
+    cx: 640, cy: 195,
+    icon: 'accesspoint',
+    labelX: 660, labelY: 199, labelAnchor: 'start',
+    connectorX1: 645, connectorY1: 195, connectorX2: 657, connectorY2: 196,
+    iconX: 668, iconY: 166,
+  },
+];
+
+// ── Connection paths ───────────────────────────────────────────────────────────
 const CONNECTIONS = [
-  {
-    id: 'line-lefkosa-girne',
-    d: 'M400,200 C380,185 360,165 330,148',
-  },
-  {
-    id: 'line-lefkosa-gazimagusa',
-    d: 'M400,200 C470,195 545,192 640,195',
-  },
-  {
-    id: 'line-girne-gazimagusa',
-    d: 'M330,148 C420,135 530,138 640,195',
-  },
+  { id: 'line-lefkosa-girne',      d: 'M400,200 C380,185 360,165 330,148' },
+  { id: 'line-lefkosa-gazimagusa', d: 'M400,200 C470,195 545,192 640,195' },
+  { id: 'line-girne-gazimagusa',   d: 'M330,148 C420,135 530,138 640,195' },
 ] as const;
 
-// ── Icon sub-components ───────────────────────────────────────────────────────
+// Staggered offsets for data-flow dots along each connection path
+const DOT_OFFSETS = [0.08, 0.41, 0.74] as const;
+
+// ── Icon sub-components ────────────────────────────────────────────────────────
 
 function LaptopIcon({ x, y }: { x: number; y: number }) {
   return (
@@ -38,13 +77,23 @@ function LaptopIcon({ x, y }: { x: number; y: number }) {
       className="product-icon"
       transform={`translate(${x - 12}, ${y - 12})`}
       style={{ opacity: 0 }}
+      aria-hidden="true"
     >
       {/* Screen */}
-      <rect x="3" y="2" width="18" height="12" rx="1.5"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" />
+      <rect x="2" y="1" width="20" height="14" rx="1.5"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" />
+      {/* Screen inner bezel */}
+      <rect x="4" y="3" width="16" height="10" rx="0.5"
+        stroke={colors.accent.primary} strokeWidth="0.5" strokeOpacity="0.4" fill="none" />
+      {/* Hinge */}
+      <line x1="2" y1="15" x2="22" y2="15"
+        stroke={colors.accent.primary} strokeWidth="0.5" strokeOpacity="0.4" />
       {/* Base */}
-      <rect x="1" y="14" width="22" height="2.5" rx="1"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" />
+      <path d="M1,15 L1,17 Q1,18 2,18 L22,18 Q23,18 23,17 L23,15"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" strokeLinejoin="round" />
+      {/* Keyboard notch */}
+      <path d="M9,18 L9,19.5 Q9,20.5 10,20.5 L14,20.5 Q15,20.5 15,19.5 L15,18"
+        stroke={colors.accent.primary} strokeWidth="0.8" fill="none" />
     </g>
   );
 }
@@ -55,16 +104,23 @@ function CameraIcon({ x, y }: { x: number; y: number }) {
       className="product-icon"
       transform={`translate(${x - 12}, ${y - 12})`}
       style={{ opacity: 0 }}
+      aria-hidden="true"
     >
-      {/* Body */}
-      <rect x="2" y="6" width="20" height="14" rx="2"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" />
-      {/* Lens */}
-      <circle cx="12" cy="13" r="4"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" />
-      {/* Viewfinder bump */}
-      <rect x="8" y="3" width="5" height="3" rx="1"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" />
+      {/* Mount arm */}
+      <rect x="10" y="1" width="4" height="7" rx="1"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" />
+      {/* Base plate */}
+      <rect x="3" y="7" width="18" height="3" rx="1.5"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" />
+      {/* Dome arc */}
+      <path d="M4,10 Q12,22 20,10"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" strokeLinecap="round" />
+      {/* Lens ring */}
+      <circle cx="12" cy="13.5" r="3"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" />
+      {/* Lens center */}
+      <circle cx="12" cy="13.5" r="1"
+        fill={colors.accent.primary} fillOpacity="0.5" />
     </g>
   );
 }
@@ -75,22 +131,25 @@ function AccessPointIcon({ x, y }: { x: number; y: number }) {
       className="product-icon"
       transform={`translate(${x - 12}, ${y - 12})`}
       style={{ opacity: 0 }}
+      aria-hidden="true"
     >
       {/* Center dot */}
-      <circle cx="12" cy="14" r="2"
+      <circle cx="12" cy="16" r="1.5"
         fill={colors.accent.primary} />
       {/* Inner arc */}
-      <path d="M8,11 A5.66,5.66 0 0 1 16,11"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d="M7.5,12.5 A6.4,6.4 0 0 1 16.5,12.5"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" strokeLinecap="round" />
+      {/* Middle arc */}
+      <path d="M4,8.5 A11.3,11.3 0 0 1 20,8.5"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" strokeLinecap="round" />
       {/* Outer arc */}
-      <path d="M4,8 A11.3,11.3 0 0 1 20,8"
-        stroke={colors.accent.primary} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d="M0.5,4.5 A16.5,16.5 0 0 1 23.5,4.5"
+        stroke={colors.accent.primary} strokeWidth="1" fill="none" strokeLinecap="round" />
     </g>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
+// ── Main component ─────────────────────────────────────────────────────────────
 export function NetworkGridScene() {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
@@ -98,20 +157,73 @@ export function NetworkGridScene() {
   useEffect(() => {
     if (reducedMotion) return;
 
+    // Tweens created outside gsap.context (in onUpdate callback) — tracked manually
+    const dataFlowTweens: Array<{ kill: () => void }> = [];
+
+    function startDataFlow(svgEl: SVGSVGElement) {
+      CONNECTIONS.forEach((conn, ci) => {
+        const path = svgEl.querySelector<SVGPathElement>(`#${conn.id}`);
+        if (!path) return;
+        const totalLength = path.getTotalLength();
+
+        DOT_OFFSETS.forEach((startOffset, di) => {
+          const dot = svgEl.querySelector<SVGCircleElement>(`#dot-${ci}-${di}`);
+          if (!dot) return;
+
+          // Snap dot to its starting position before animating
+          const startPt = path.getPointAtLength(startOffset * totalLength);
+          dot.setAttribute('cx', String(startPt.x));
+          dot.setAttribute('cy', String(startPt.y));
+
+          // Proxy object drives the path-tracing progress
+          const proxy = { progress: startOffset };
+
+          const moveTween = gsap.to(proxy, {
+            progress: startOffset + 1,
+            duration: 2.8 + ci * 0.35,
+            repeat: -1,
+            ease: 'none',
+            delay: di * 0.25,
+            onUpdate() {
+              // Modulo wrap keeps progress in [0, 1)
+              const t = ((proxy.progress % 1) + 1) % 1;
+              const pt = path.getPointAtLength(t * totalLength);
+              dot.setAttribute('cx', String(pt.x));
+              dot.setAttribute('cy', String(pt.y));
+            },
+          });
+
+          const fadeTween = gsap.to(dot, {
+            opacity: 0.55,
+            duration: 0.5,
+            delay: di * 0.25 + 0.15,
+            ease: animation.ease.decelerate.css,
+          });
+
+          dataFlowTweens.push(moveTween, fadeTween);
+        });
+      });
+    }
+
     const ctx = gsap.context(() => {
-      // Measure all path lengths and set dasharray/dashoffset
-      const lines = document.querySelectorAll<SVGPathElement>('.network-line');
+      const section = sectionRef.current;
+      if (!section) return;
+
+      // ── Measure paths and initialise dashoffset ──
+      const lines = section.querySelectorAll<SVGPathElement>('.network-line');
       lines.forEach((path) => {
         const length = path.getTotalLength();
         gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
       });
 
-      // Also set glow-line dasharray/dashoffset to match
-      const glowLines = document.querySelectorAll<SVGPathElement>('.network-line-glow');
+      const glowLines = section.querySelectorAll<SVGPathElement>('.network-line-glow');
       glowLines.forEach((path) => {
         const length = path.getTotalLength();
-        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+        gsap.set(path, { opacity: 0, strokeDasharray: length, strokeDashoffset: length });
       });
+
+      // ── Scrubbed scroll timeline ──
+      let dataFlowStarted = false;
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -121,68 +233,76 @@ export function NetworkGridScene() {
           pin: '#network-scene-inner',
           scrub: 1,
           anticipatePin: 1,
+          onUpdate(self) {
+            // Start data-flow dots once lines are fully drawn (~65% scroll)
+            if (self.progress >= 0.65 && !dataFlowStarted) {
+              dataFlowStarted = true;
+              const svgEl = section.querySelector<SVGSVGElement>('#trnc-map');
+              if (svgEl) startDataFlow(svgEl);
+            }
+          },
         },
       });
 
-      // 0–20%: Map fades in with slight scale
+      // 0–15%: Map outline fades in + subtle scale
       tl.fromTo(
         '#trnc-map',
-        { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 0.2, ease: animation.ease.cinematic.css },
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 0.15, ease: animation.ease.cinematic.css },
+        0,
       );
 
-      // 20–40%: City nodes pulse in, staggered
+      // 15–30%: City nodes scale in with spring ease, staggered
       tl.fromTo(
         '.city-node',
         { opacity: 0, scale: 0 },
         {
-          opacity: 1,
-          scale: 1,
-          stagger: 0.05,
-          duration: 0.15,
+          opacity: 1, scale: 1,
+          stagger: 0.05, duration: 0.12,
           ease: animation.ease.spring.css,
           transformOrigin: 'center center',
         },
-        0.2,
+        0.15,
       );
 
-      // 40–80%: Lines draw (main + glow together)
+      // 30–65%: Connection lines draw (main + glow), staggered
       tl.to(
-        '.network-line, .network-line-glow',
-        {
-          strokeDashoffset: 0,
-          stagger: 0.1,
-          duration: 0.3,
-          ease: animation.ease.smooth.css,
-        },
-        0.4,
+        '.network-line',
+        { strokeDashoffset: 0, stagger: 0.08, duration: 0.28, ease: animation.ease.smooth.css },
+        0.3,
+      );
+      tl.to(
+        '.network-line-glow',
+        { opacity: 0.15, strokeDashoffset: 0, stagger: 0.08, duration: 0.28, ease: animation.ease.smooth.css },
+        0.3,
       );
 
-      // 70–100%: Product icons fade in, staggered
+      // 65–80%: Product icons fade in with slight upward float
       tl.fromTo(
         '.product-icon',
-        { opacity: 0, y: 10 },
+        { opacity: 0, y: 8 },
         {
-          opacity: 1,
-          y: 0,
-          stagger: 0.05,
-          duration: 0.15,
+          opacity: 1, y: 0,
+          stagger: 0.05, duration: 0.12,
           ease: animation.ease.decelerate.css,
         },
-        0.7,
+        0.65,
       );
 
-      // Scene title fades in last
+      // 80–100%: Scene title letter-spacing entrance
       tl.fromTo(
         '#network-scene-title',
         { opacity: 0, y: 14, letterSpacing: '0.15em' },
         { opacity: 1, y: 0, letterSpacing: '0.1em', duration: 0.15, ease: animation.ease.cinematic.css },
-        0.85,
+        0.8,
       );
     }, sectionRef);
 
-    // ERR-003 cleanup — kills timeline + ScrollTrigger on unmount
-    return () => ctx.revert();
+    // ERR-003: always clean up context + manually-tracked data-flow tweens
+    return () => {
+      ctx.revert();
+      dataFlowTweens.forEach((t) => t.kill());
+    };
   }, [reducedMotion]);
 
   return (
@@ -191,35 +311,17 @@ export function NetworkGridScene() {
       ref={sectionRef}
       style={{ height: '200vh', background: colors.background }}
     >
-      {/* ── Dot-grid background ── */}
+      {/* CSS keyframes: only for continuous ambient effects, never scroll-driven */}
       <style>{`
-        #network-scene-inner {
-          background-image: radial-gradient(circle, ${colors.border} 1px, transparent 1px);
-          background-size: 32px 32px;
+        @keyframes ngs-pulse-ring {
+          0%   { transform: scale(1);    opacity: 0.22; }
+          65%  { transform: scale(1.85); opacity: 0.05; }
+          100% { transform: scale(1.85); opacity: 0;    }
         }
-
-        @keyframes pulse-ring {
-          0%   { transform: scale(1);   opacity: 0.35; }
-          60%  { transform: scale(1.55); opacity: 0.12; }
-          100% { transform: scale(1.55); opacity: 0;    }
-        }
-
-        .city-pulse-ring {
+        .city-pulse-outer {
           transform-box: fill-box;
           transform-origin: center;
-          animation: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        .city-pulse-ring:nth-of-type(2) { animation-delay: 0.8s; }
-        .city-pulse-ring:nth-of-type(3) { animation-delay: 1.6s; }
-
-        @keyframes glow-breathe {
-          0%, 100% { stroke-opacity: 0.15; }
-          50%       { stroke-opacity: 0.28; }
-        }
-
-        .network-line-glow.drawn {
-          animation: glow-breathe 3s ease-in-out infinite;
+          animation: ngs-pulse-ring 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
       `}</style>
 
@@ -235,9 +337,21 @@ export function NetworkGridScene() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors.background,
+          background: `radial-gradient(ellipse at 50% 45%, rgba(91,110,245,0.045) 0%, transparent 58%), ${colors.background}`,
         }}
       >
+        {/* Vignette overlay — darkens edges for cinematic depth */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(ellipse at center, transparent 50%, rgba(10,10,15,0.68) 100%)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
+
         {/* ── SVG Map ── */}
         <svg
           id="trnc-map"
@@ -247,86 +361,76 @@ export function NetworkGridScene() {
             maxWidth: 900,
             height: 'auto',
             opacity: reducedMotion ? 1 : 0,
+            position: 'relative',
+            zIndex: 2,
           }}
-          aria-label="TRNC Network Map"
+          aria-label="TRNC Ağ Haritası — Lefkoşa, Girne ve Gazimağusa arasındaki kurumsal ağ bağlantıları"
           role="img"
         >
           <defs>
-            {/* Ambient glow filter for nodes */}
-            <filter id="node-glow" x="-50%" y="-50%" width="200%" height="200%">
+            {/* City node ambient glow */}
+            <filter id="ngs-node-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            {/* Blur for connection glow lines */}
+            <filter id="ngs-line-glow" x="-5%" y="-200%" width="110%" height="500%">
               <feGaussianBlur stdDeviation="3" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {/* Blur for glow lines */}
-            <filter id="line-glow" x="-10%" y="-200%" width="120%" height="500%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
+
+            {/* Faint indigo outer glow around the island outline */}
+            <filter id="ngs-island-glow" x="-6%" y="-18%" width="112%" height="136%">
+              <feGaussianBlur stdDeviation="7" result="blur" />
+              <feFlood floodColor="#5B6EF5" floodOpacity="0.1" result="color" />
+              <feComposite in="color" in2="blur" operator="in" result="coloredBlur" />
               <feMerge>
-                <feMergeNode in="blur" />
+                <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
 
-          {/* ── Topographic contour fills ── */}
-          {/* Outermost — subtle terrain suggestion */}
-          <path
-            d="M42,205 C72,183 112,162 172,152 C232,142 292,132 352,127 C412,122 472,120 532,122 C592,127 652,137 712,157 C742,167 762,183 756,205 C748,227 718,242 678,247 C638,252 598,255 558,252 C518,249 478,247 438,245 C398,243 358,242 318,245 C278,248 238,252 198,255 C158,258 118,252 88,237 C62,224 38,215 42,205 Z"
-            fill={colors.borderSubtle}
-            stroke="none"
-            opacity={0.4}
-          />
-          {/* Middle terrain band */}
-          <path
-            d="M80,202 C108,186 145,168 200,158 C255,148 310,138 368,133 C426,128 482,126 538,128 C594,133 648,143 700,160 C724,170 740,184 736,202 C728,220 700,233 662,237 C624,241 586,244 548,241 C510,238 472,236 434,234 C396,232 358,231 320,234 C282,237 244,241 206,244 C168,246 130,240 102,226 C82,215 64,210 80,202 Z"
-            fill="none"
-            stroke={colors.border}
-            strokeWidth={0.6}
-            opacity={0.5}
-          />
-          {/* Inner ridge line */}
-          <path
-            d="M120,200 C148,188 182,174 232,165 C282,156 336,148 390,145 C444,142 498,142 550,146 C602,151 650,161 694,176 C714,184 726,194 722,205 C714,218 692,228 658,232 C624,235 590,238 554,235 C518,232 482,230 446,228 C410,226 374,225 338,228 C302,231 266,235 230,238 C194,240 160,234 136,222 C120,212 108,206 120,200 Z"
-            fill="none"
-            stroke={colors.border}
-            strokeWidth={0.4}
-            opacity={0.4}
-          />
-          {/* Innermost highland ridge */}
-          <path
-            d="M160,198 C188,188 218,178 264,170 C310,162 360,156 410,153 C460,150 510,150 558,154 C606,159 648,169 682,182 C698,189 706,197 702,207 C696,218 676,226 648,229 C620,232 590,234 558,231 C526,228 494,226 462,224 C430,222 398,221 366,224 C334,227 302,230 270,233 C238,235 208,229 184,218 C168,210 148,203 160,198 Z"
-            fill="none"
-            stroke={colors.borderSubtle}
-            strokeWidth={0.5}
-            opacity={0.35}
+          {/* Subtle radial background wash behind the island */}
+          <ellipse
+            cx="400" cy="200" rx="310" ry="148"
+            fill="rgba(91,110,245,0.022)"
+            aria-hidden="true"
           />
 
-          {/* ── Main TRNC outline ── */}
+          {/* ── TRNC main outline — subtle fill + outer island glow ── */}
           <path
             d="M50,200 C80,180 120,160 180,150 C240,140 300,130 360,125 C420,120 480,118 540,120 C600,125 660,135 720,155 C750,165 770,180 750,200 C730,220 700,235 660,240 C620,245 580,248 540,245 C500,242 460,240 420,238 C380,236 340,235 300,238 C260,241 220,245 180,248 C140,250 100,245 70,230 C50,220 45,210 50,200 Z"
-            fill="none"
+            fill="rgba(91, 110, 245, 0.03)"
             stroke="#3A3A45"
             strokeWidth={1.5}
+            filter="url(#ngs-island-glow)"
           />
 
-          {/* ── Glow lines (drawn behind crisp lines) ── */}
+          {/* ── Glow lines (behind crisp lines) — opacity animated by GSAP ── */}
           {CONNECTIONS.map((conn) => (
             <path
               key={`${conn.id}-glow`}
               className="network-line-glow"
               d={conn.d}
               stroke={colors.accent.primary}
-              strokeWidth={6}
-              strokeOpacity={reducedMotion ? 0.15 : 0}
+              strokeWidth={4}
+              strokeOpacity={0.15}
               fill="none"
-              filter="url(#line-glow)"
-              style={{ opacity: reducedMotion ? 1 : undefined }}
+              strokeLinecap="round"
+              filter="url(#ngs-line-glow)"
+              aria-hidden="true"
             />
           ))}
 
-          {/* ── Crisp connection lines ── */}
+          {/* ── Crisp connection lines — dash-drawn by GSAP ScrollTrigger ── */}
           {CONNECTIONS.map((conn) => (
             <path
               key={conn.id}
@@ -334,57 +438,92 @@ export function NetworkGridScene() {
               className="network-line"
               d={conn.d}
               stroke={colors.accent.primary}
-              strokeWidth={2}
+              strokeWidth={1.5}
               fill="none"
               strokeLinecap="round"
+              aria-hidden="true"
               style={reducedMotion ? { strokeDasharray: 'none' } : undefined}
             />
           ))}
 
-          {/* ── City nodes ── */}
+          {/* ── Data flow dots — animated along paths after lines are drawn ── */}
+          <g aria-hidden="true">
+            {CONNECTIONS.map((_, ci) =>
+              DOT_OFFSETS.map((_offset, di) => (
+                <circle
+                  key={`dot-${ci}-${di}`}
+                  id={`dot-${ci}-${di}`}
+                  r={3}
+                  cx={0}
+                  cy={0}
+                  fill={colors.accent.primary}
+                  opacity={0}
+                />
+              ))
+            )}
+          </g>
+
+          {/* ── City nodes — 3-ring design with CSS pulse ── */}
           {CITIES.map((city) => (
             <g
               key={city.id}
               id={`city-${city.id}`}
               className="city-node"
               style={{ opacity: reducedMotion ? 1 : 0 }}
-              filter="url(#node-glow)"
             >
-              {/* Outer pulse ring */}
+              {/* Animated pulse ring (CSS, ambient — independent of scroll) */}
               <circle
-                cx={city.cx}
-                cy={city.cy}
-                r={14}
-                fill="none"
-                stroke={colors.accent.primary}
-                strokeOpacity={0.3}
-                className="city-pulse-ring"
-              />
-              {/* Mid ring */}
-              <circle
-                cx={city.cx}
-                cy={city.cy}
-                r={10}
+                cx={city.cx} cy={city.cy} r={14}
                 fill="none"
                 stroke={colors.accent.primary}
                 strokeOpacity={0.2}
                 strokeWidth={1}
+                className="city-pulse-outer"
+                aria-hidden="true"
               />
-              {/* Core dot */}
+              {/* Outer static ring */}
               <circle
-                cx={city.cx}
-                cy={city.cy}
-                r={6}
+                cx={city.cx} cy={city.cy} r={14}
+                fill="none"
+                stroke={colors.accent.primary}
+                strokeOpacity={0.2}
+                strokeWidth={1}
+                aria-hidden="true"
+              />
+              {/* Inner ring */}
+              <circle
+                cx={city.cx} cy={city.cy} r={9}
+                fill="none"
+                stroke={colors.accent.primary}
+                strokeOpacity={0.4}
+                strokeWidth={1}
+                aria-hidden="true"
+              />
+              {/* Core dot with glow */}
+              <circle
+                cx={city.cx} cy={city.cy} r={5}
                 fill={colors.accent.primary}
+                filter="url(#ngs-node-glow)"
+                aria-label={city.name}
+              />
+              {/* Connector line from node to label */}
+              <line
+                x1={city.connectorX1} y1={city.connectorY1}
+                x2={city.connectorX2} y2={city.connectorY2}
+                stroke={colors.accent.primary}
+                strokeWidth={1}
+                strokeOpacity={0.3}
+                aria-hidden="true"
               />
               {/* City label */}
               <text
-                x={city.cx + (city.id === 'gazimagusa' ? 10 : -10)}
-                y={city.cy - 20}
+                x={city.labelX}
+                y={city.labelY}
                 fill={colors.text.secondary}
-                fontSize={13}
-                fontFamily={designTokens.typography.fontFamily.body}
-                textAnchor={city.id === 'gazimagusa' ? 'start' : 'end'}
+                fontSize={12}
+                fontFamily={typography.fontFamily.body}
+                fontWeight={typography.fontWeight.medium}
+                textAnchor={city.labelAnchor}
                 letterSpacing="0.04em"
               >
                 {city.name}
@@ -394,27 +533,28 @@ export function NetworkGridScene() {
 
           {/* ── Product category icons ── */}
           {CITIES.map((city) => {
-            const offset = city.id === 'gazimagusa' ? { x: 18, y: -8 } : { x: -18, y: -8 };
-            const iconX = city.cx + offset.x + (city.id === 'gazimagusa' ? 12 : -12);
-            const iconY = city.cy + offset.y + 12;
-            if (city.icon === 'laptop') return <LaptopIcon key={city.id} x={iconX} y={iconY} />;
-            if (city.icon === 'camera') return <CameraIcon key={city.id} x={iconX} y={iconY} />;
-            return <AccessPointIcon key={city.id} x={iconX} y={iconY} />;
+            if (city.icon === 'laptop')
+              return <LaptopIcon key={city.id} x={city.iconX} y={city.iconY} />;
+            if (city.icon === 'camera')
+              return <CameraIcon key={city.id} x={city.iconX} y={city.iconY} />;
+            return <AccessPointIcon key={city.id} x={city.iconX} y={city.iconY} />;
           })}
         </svg>
 
-        {/* ── Scene title ── */}
+        {/* ── Scene title — letterSpacing entrance via GSAP ── */}
         <p
           id="network-scene-title"
           style={{
             marginTop: '2rem',
             color: colors.text.secondary,
             fontSize: '0.75rem',
-            fontFamily: designTokens.typography.fontFamily.heading,
-            fontWeight: designTokens.typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily.heading,
+            fontWeight: typography.fontWeight.semibold,
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
             opacity: reducedMotion ? 1 : 0,
+            position: 'relative',
+            zIndex: 2,
           }}
         >
           Ağ Altyapımız&nbsp;·&nbsp;Connecting TRNC Enterprises

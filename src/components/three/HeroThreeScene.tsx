@@ -1,39 +1,35 @@
 'use client';
 
 /**
- * HeroThreeScene — the actual R3F <Canvas> component.
+ * HeroThreeScene — R3F Canvas component.
  * Dynamically imported by HeroScene.tsx with `ssr: false`.
- * Kept in a separate file so the Canvas and Three.js bundle are
- * never included in the server-rendered output.
+ * Reads animation state from heroBridge (module-level mutable object) —
+ * no React props needed, no re-renders on scroll.
  */
 
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { SceneLighting } from './SceneLighting';
-import { LaptopModel } from './LaptopModel';
+import { LaptopGLTF } from './LaptopGLTF';
+import { FloatingParticles } from './FloatingParticles';
 import { designTokens } from '@/lib/design-tokens';
 
-interface HeroThreeSceneProps {
-  scrollProgress: number;
-  laptopRotation: [number, number, number];
-  screenOpen: number;
-}
-
-export default function HeroThreeScene({
-  scrollProgress,
-  laptopRotation,
-  screenOpen,
-}: HeroThreeSceneProps) {
+export default function HeroThreeScene() {
   return (
     <Canvas
       className="absolute inset-0 w-full h-full"
       style={{ backgroundColor: designTokens.colors.background }}
-      camera={{ position: [0, 1, 5], fov: 45 }}
+      camera={{ position: [0, 0.4, 4.5], fov: 42 }}
       shadows
       gl={{ antialias: true, alpha: false }}
       dpr={[1, 2]}
     >
-      <SceneLighting progress={scrollProgress} />
-      <LaptopModel rotation={laptopRotation} screenOpen={screenOpen} />
+      <Suspense fallback={null}>
+        <SceneLighting />
+        <LaptopGLTF />
+        <FloatingParticles />
+      </Suspense>
     </Canvas>
   );
 }
+
