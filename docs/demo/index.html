@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HyperFrames Demo</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Root composition container */
+    [data-composition-id="demo-intro"] {
+      width: 100%;
+      height: 100%;
+      background: #0a0e27;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      color: #e8eef7;
+      overflow: hidden;
+    }
+
+    /* Scene container — fills the composition */
+    .scene-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 120px 160px;
+      gap: 32px;
+      text-align: center;
+    }
+
+    /* Scene 1: Hero Title */
+    .scene-1 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .hero-title {
+      font-size: 120px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -2px;
+    }
+
+    .hero-subtitle {
+      font-size: 32px;
+      font-weight: 400;
+      color: #00d9ff;
+      opacity: 0.9;
+    }
+
+    .hero-divider {
+      width: 60px;
+      height: 3px;
+      background: #00d9ff;
+      border-radius: 2px;
+      margin-top: 16px;
+    }
+
+    /* Scene 2: Content Grid */
+    .scene-2 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 48px;
+    }
+
+    .scene-2-title {
+      font-size: 64px;
+      font-weight: 700;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      width: 100%;
+    }
+
+    .feature-card {
+      padding: 32px;
+      background: rgba(26, 31, 58, 0.8);
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .feature-card-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: #00d9ff;
+      margin-bottom: 12px;
+    }
+
+    .feature-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card-text {
+      font-size: 14px;
+      color: #d0d8f0;
+    }
+
+    /* Scene 3: CTA */
+    .scene-3 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .scene-3-title {
+      font-size: 72px;
+      font-weight: 700;
+    }
+
+    .scene-3-text {
+      font-size: 24px;
+      color: #00d9ff;
+    }
+
+    .cta-button {
+      padding: 16px 48px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #0a0e27;
+      background: #00d9ff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+
+    /* Smooth cyan transition overlay */
+    .transition-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 217, 255, 0.05);
+      pointer-events: none;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main composition container -->
+  <div
+    id="demo-intro"
+    data-composition-id="demo-intro"
+    data-start="0"
+    data-duration="18"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- SCENE 1: Hero Title (0–6s) -->
+    <div id="scene-1" class="clip scene-content scene-1" data-start="0" data-duration="6" data-track-index="0">
+      <h1 class="hero-title" id="s1-title">HyperFrames</h1>
+      <div class="hero-divider" id="s1-divider"></div>
+      <p class="hero-subtitle" id="s1-subtitle">HTML is the source of truth for video</p>
+    </div>
+
+    <!-- SCENE 2: Features (6–12s) -->
+    <div id="scene-2" class="clip scene-content scene-2" data-start="6" data-duration="6" data-track-index="0">
+      <h2 class="scene-2-title" id="s2-title">Three Core Principles</h2>
+      <div class="features-grid">
+        <div class="feature-card" id="s2-card-1">
+          <div class="feature-card-number">1</div>
+          <div class="feature-card-title">Layout First</div>
+          <div class="feature-card-text">Build the end-state in static CSS. Then animate into it.</div>
+        </div>
+        <div class="feature-card" id="s2-card-2">
+          <div class="feature-card-number">2</div>
+          <div class="feature-card-title">Data Driven</div>
+          <div class="feature-card-text">
+            Timing via data-attributes. GSAP handles choreography.
+          </div>
+        </div>
+        <div class="feature-card" id="s2-card-3">
+          <div class="feature-card-number">3</div>
+          <div class="feature-card-title">Scene Transitions</div>
+          <div class="feature-card-text">Always transition between scenes. No jump cuts.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: Call-to-Action (12–18s) -->
+    <div id="scene-3" class="clip scene-content scene-3" data-start="12" data-duration="6" data-track-index="0">
+      <h2 class="scene-3-title" id="s3-title">Ready to Create?</h2>
+      <p class="scene-3-text" id="s3-text">Compositions render to MP4 at 60fps.</p>
+      <button class="cta-button" id="s3-button">Learn More</button>
+    </div>
+
+    <!-- GSAP and Timeline Configuration -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      // Initialize window.__timelines if not already present
+      window.__timelines = window.__timelines || {};
+
+      // Create the main timeline — starts paused (framework controls playback)
+      const tl = gsap.timeline({ paused: true });
+
+      /* ═══════════════════════════════════════════════════════════
+         SCENE 1: HERO (0–6s)
+         
+         Principle: Entrance animations only. No exits.
+         All elements are visible during hero frame. Transition at 6s
+         handles the scene change.
+         ═══════════════════════════════════════════════════════════ */
+
+      // Offset first animation 0.2s (not at t=0)
+      tl.from("#s1-title", 
+        { y: 60, opacity: 0, duration: 0.8, ease: "power3.out" }, 
+        0.2
+      );
+
+      // Stagger subtitle + divider — vary eases
+      tl.from("#s1-divider", 
+        { scaleX: 0, opacity: 0, duration: 0.5, ease: "back.out" }, 
+        0.5
+      );
+
+      tl.from("#s1-subtitle", 
+        { y: 30, opacity: 0, duration: 0.6, ease: "expo.out" }, 
+        0.7
+      );
+
+      // Ambient breathing effect on title (optional, shows long tweens)
+      tl.to("#s1-title", 
+        { y: -8, duration: 2, ease: "sine.inOut", repeat: 1, yoyo: true }, 
+        1.5
+      );
+
+      /* ═══════════════════════════════════════════════════════════
+         SCENE 2: FEATURES (6–12s)
+         
+         Transition fires at 6s. New scene enters with fresh animations.
+         Three cards stagger in with varied eases.
+         ═══════════════════════════════════════════════════════════ */
+
+      // Scene 2 heading
+      tl.from("#s2-title", 
+        { y: 50, opacity: 0, duration: 0.7, ease: "power3.out" }, 
+        6.3  // 0.3s after transition fires
+      );
+
+      // Feature cards — stagger at 120ms with different eases
+      tl.from("#s2-card-1", 
+        { y: 40, opacity: 0, duration: 0.6, ease: "power2.out" }, 
+        6.8
+      );
+
+      tl.from("#s2-card-2", 
+        { y: 40, opacity: 0, duration: 0.6, ease: "back.out" }, 
+        6.95  // 120ms stagger
+      );
+
+      tl.from("#s2-card-3", 
+        { y: 40, opacity: 0, duration: 0.6, ease: "elastic.out(1, 0.5)" }, 
+        7.1   // 120ms stagger
+      );
+
+      // Subtle hover-ready scale (ambient motion)
+      tl.to("#s2-card-1", 
+        { scale: 1.02, duration: 1.5, ease: "sine.inOut", repeat: 1, yoyo: true }, 
+        7.8
+      );
+
+      /* ═══════════════════════════════════════════════════════════
+         SCENE 3: CALL-TO-ACTION (12–18s)
+         
+         Final scene. Transition at 12s. Can use exit animations
+         on the final scene only.
+         ═══════════════════════════════════════════════════════════ */
+
+      tl.from("#s3-title", 
+        { y: 60, opacity: 0, duration: 0.8, ease: "power3.out" }, 
+        12.3
+      );
+
+      tl.from("#s3-text", 
+        { y: 30, opacity: 0, duration: 0.6, ease: "power2.out" }, 
+        12.7
+      );
+
+      tl.from("#s3-button", 
+        { scale: 0.8, opacity: 0, duration: 0.5, ease: "back.out" }, 
+        13.1
+      );
+
+      // Final scene: allow button to fade out (end of composition)
+      tl.to("#s3-button", 
+        { opacity: 0.6, duration: 1, ease: "sine.inOut", repeat: 1, yoyo: true }, 
+        14.5
+      );
+
+      // Register the timeline — framework reads this synchronously
+      window.__timelines["demo-intro"] = tl;
+
+      console.log(
+        "✓ HyperFrames demo loaded.\n" +
+        "Timeline: demo-intro (18s)\n" +
+        "Scenes: 3 (Hero 0–6s, Features 6–12s, CTA 12–18s)\n" +
+        "Run: npx hyperframes preview"
+      );
+    </script>
+  </div>
+</body>
+</html>

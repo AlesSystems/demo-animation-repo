@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 const navLinks = [
   { label: 'Products', href: '/products' },
@@ -11,13 +12,21 @@ const navLinks = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const direction = useScrollDirection();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      const y = window.scrollY;
+      setScrollY(y);
+      setScrolled(y > 20);
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const isHidden = direction === 'down' && scrollY > 100;
 
   return (
     <header
@@ -25,7 +34,8 @@ export function Navbar() {
         scrolled
           ? 'bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800'
           : 'bg-transparent'
-      }`}
+      } ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}
+      style={{ transitionProperty: 'transform, background-color, border-color, backdrop-filter', transitionDuration: '300ms', transitionTimingFunction: 'var(--ease-cinematic)' }}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Brand */}
