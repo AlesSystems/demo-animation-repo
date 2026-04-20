@@ -1,0 +1,58 @@
+/* ─── Font Configuration — Ales B2B Hardware Platform ────────────────────── */
+/*                                                                             */
+/* Primary fonts are loaded via `next/font` in src/app/layout.tsx for         */
+/* optimal performance (subsetting, zero-FOUT, automatic preload).            */
+/*                                                                             */
+/* Usage in layout.tsx:                                                        */
+/*   import { Inter } from "next/font/google";                                 */
+/*   import localFont from "next/font/local";                                  */
+/*                                                                             */
+/*   const inter = Inter({                                                     */
+/*     subsets: ["latin"],                                                     */
+/*     variable: "--next-font-inter",                                          */
+/*     display: "swap",                                                        */
+/*     weight: ["400", "500", "600", "700"],                                   */
+/*   });                                                                       */
+/*                                                                             */
+/*   const jetbrainsMono = localFont({                                         */
+/*     src: "../../public/fonts/JetBrainsMono-Variable.woff2",                 */
+/*     variable: "--next-font-mono",                                           */
+/*     display: "swap",                                                        */
+/*   });                                                                       */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/* ─── System Font Fallback Stacks ────────────────────────────────────────── */
+/* These CSS custom properties provide graceful fallbacks when next/font       */
+/* variables are not yet injected (e.g., during SSR flash).                    */
+:root {
+  --font-fallback-sans: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  --font-fallback-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", Menlo, monospace;
+}
+
+/* ─── Inter Fallback Font-Face ───────────────────────────────────────────── */
+/* Metric-adjusted fallback to reduce layout shift before Inter loads.         */
+/* Values approximate Inter's metrics to avoid CLS.                            */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  ascent-override: 90.2%;
+  descent-override: 22.48%;
+  line-gap-override: 0%;
+  size-adjust: 107.4%;
+  font-display: swap;
+}
+
+/* ─── JetBrains Mono Fallback ────────────────────────────────────────────── */
+@font-face {
+  font-family: "JetBrains Mono Fallback";
+  src: local("Courier New");
+  ascent-override: 83%;
+  descent-override: 20%;
+  line-gap-override: 0%;
+  size-adjust: 112%;
+  font-display: swap;
+}

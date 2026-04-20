@@ -1,0 +1,194 @@
+/* ─── Keyframe Animations — Ales B2B Hardware Platform ───────────────────── */
+/* Complex animations that can't be done easily in Tailwind utility classes.  */
+/* Use these via: animation: fadeInUp var(--duration-slow) var(--ease-cinematic) both */
+
+/* ─── Fade In Up ─────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Fade In Down ───────────────────────────────────────────────────────── */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Scale In ───────────────────────────────────────────────────────────── */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── Slide In Left ──────────────────────────────────────────────────────── */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── Slide In Right ─────────────────────────────────────────────────────── */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── Clip Reveal (left → right text/image reveal) ──────────────────────── */
+@keyframes clipReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0% 0 0);
+  }
+}
+
+/* ─── Clip Reveal Up (bottom → top reveal) ──────────────────────────────── */
+@keyframes clipRevealUp {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0% 0 0 0);
+  }
+}
+
+/* ─── Blur In ────────────────────────────────────────────────────────────── */
+@keyframes blurIn {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+
+/* ─── Shimmer (loading skeleton sweep) ──────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ─── Pulse Glow (accent glow pulse for CTAs / highlights) ──────────────── */
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(91, 110, 245, 0.25),
+      0 0 30px rgba(91, 110, 245, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(91, 110, 245, 0.45),
+      0 0 60px rgba(91, 110, 245, 0.18);
+  }
+}
+
+/* ─── Float (subtle hover float for cards / 3D elements) ────────────────── */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* ─── Gradient Shift (animated gradient backgrounds) ────────────────────── */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ─── Convenience Animation Classes ─────────────────────────────────────── */
+/* Use these as starting points; GSAP / Framer Motion override for JS control */
+
+.animate-fade-in-up {
+  animation: fadeInUp var(--duration-slow) var(--ease-cinematic) both;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown var(--duration-slow) var(--ease-cinematic) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-cinematic) both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft var(--duration-slow) var(--ease-decelerate) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--duration-slow) var(--ease-decelerate) both;
+}
+
+.animate-clip-reveal {
+  animation: clipReveal var(--duration-cinematic) var(--ease-cinematic) both;
+}
+
+.animate-blur-in {
+  animation: blurIn var(--duration-slow) var(--ease-cinematic) both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    var(--color-surface-elevated) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s var(--ease-smooth) infinite;
+}
+
+.animate-float {
+  animation: float 4s var(--ease-smooth) infinite;
+}

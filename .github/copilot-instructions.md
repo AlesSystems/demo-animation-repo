@@ -363,7 +363,7 @@ Log every error encountered during implementation to `docs/ERROR.md` using the `
 
 - Write short summary text in console to inform developer what to expect from that implementation.
 - Provide guidance on how to test the current phase and inform user if manual approach is needed
-- Ensure .github\workflows\ci.yml test will pass as soon as I push to github: Lint check and Type Check.
+- Ensure .github\workflows\ci.yml test will pass as soon as I push to github.
 
 ## About Errors:
 - Before implementing, check ERRORS.md for known failure patterns 

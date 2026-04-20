@@ -1,0 +1,194 @@
+@import "tailwindcss";
+@import "../styles/animations.css";
+@import "../styles/fonts.css";
+
+/* ─── CSS Custom Properties — derived from design-tokens.ts ──────────────── */
+:root {
+  /* Colors */
+  --color-background: #0a0a0f;
+  --color-surface: #12121a;
+  --color-surface-elevated: #1a1a25;
+  --color-border: #2a2a35;
+  --color-border-subtle: #1e1e2a;
+
+  --color-text-primary: #f0f0f5;
+  --color-text-secondary: #8a8a95;
+  --color-text-tertiary: #5a5a65;
+
+  --color-accent-primary: #5b6ef5;
+  --color-accent-primary-hover: #6f80ff;
+  --color-accent-primary-muted: rgba(91, 110, 245, 0.15);
+  --color-accent-secondary: #f5a623;
+  --color-accent-secondary-hover: #ffb83f;
+  --color-accent-secondary-muted: rgba(245, 166, 35, 0.15);
+  --color-accent-gradient: linear-gradient(
+    135deg,
+    #5b6ef5 0%,
+    #8b5cf6 50%,
+    #06b6d4 100%
+  );
+  --color-accent-gradient-subtle: linear-gradient(
+    135deg,
+    rgba(91, 110, 245, 0.12) 0%,
+    rgba(139, 92, 246, 0.08) 100%
+  );
+
+  --color-success: #22c55e;
+  --color-warning: #f5a623;
+  --color-error: #ef4444;
+  --color-info: #06b6d4;
+
+  /* Typography */
+  --font-heading: "Inter", "Inter Fallback", system-ui, sans-serif;
+  --font-body: "Inter", "Inter Fallback", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+
+  /* Easing curves */
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 800ms;
+  --duration-cinematic: 1200ms;
+
+  /* Shadows */
+  --shadow-glow: 0 0 20px rgba(91, 110, 245, 0.3),
+    0 0 60px rgba(91, 110, 245, 0.1);
+  --shadow-glow-amber: 0 0 20px rgba(245, 166, 35, 0.3),
+    0 0 60px rgba(245, 166, 35, 0.1);
+}
+
+/* ─── Tailwind v4 Theme Extension ────────────────────────────────────────── */
+@theme inline {
+  /* Surface colors */
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-border: var(--color-border);
+  --color-border-subtle: var(--color-border-subtle);
+
+  /* Text */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+
+  /* Accents */
+  --color-accent: var(--color-accent-primary);
+  --color-accent-hover: var(--color-accent-primary-hover);
+  --color-accent-muted: var(--color-accent-primary-muted);
+  --color-cta: var(--color-accent-secondary);
+  --color-cta-hover: var(--color-accent-secondary-hover);
+  --color-cta-muted: var(--color-accent-secondary-muted);
+
+  /* Semantic */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  /* Fonts */
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  /* Easing (exposed as Tailwind timing functions) */
+  --ease-cinematic: var(--ease-cinematic);
+  --ease-spring: var(--ease-spring);
+  --ease-smooth: var(--ease-smooth);
+  --ease-sharp: var(--ease-sharp);
+  --ease-decelerate: var(--ease-decelerate);
+  --ease-accelerate: var(--ease-accelerate);
+
+  /* Durations */
+  --duration-fast: var(--duration-fast);
+  --duration-normal: var(--duration-normal);
+  --duration-slow: var(--duration-slow);
+  --duration-slower: var(--duration-slower);
+  --duration-cinematic: var(--duration-cinematic);
+}
+
+/* ─── Global Base Styles ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  min-height: 100dvh;
+}
+
+/* ─── Selection ──────────────────────────────────────────────────────────── */
+::selection {
+  background-color: var(--color-accent-primary-muted);
+  color: var(--color-accent-primary-hover);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) var(--color-background);
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
