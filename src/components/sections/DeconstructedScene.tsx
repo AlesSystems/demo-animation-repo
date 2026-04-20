@@ -104,13 +104,12 @@ function ProgressBridge({ progressRef, staticProgress, reducedMotion }: Progress
     if (reducedMotion) return;
     const next = progressRef.current?.value ?? 0;
     setDisplayProgress((prev) => {
-      // Skip re-render when change is sub-visual
       if (Math.abs(next - prev) > 0.002) return next;
       return prev;
     });
   });
 
-  return <ExplodedLaptop progress={displayProgress} />;
+  return <ExplodedLaptop progress={displayProgress} reducedMotion={reducedMotion} />;
 }
 
 // ─── DeconstructedScene ───────────────────────────────────────────────────────
@@ -125,6 +124,10 @@ export function DeconstructedScene() {
   // Label DOM refs for GSAP opacity animation
   const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Heading element refs for scroll-enter fade-in
+  const subLabelRef = useRef<HTMLParagraphElement>(null);
+  const headingRef  = useRef<HTMLHeadingElement>(null);
+
   // Reduced motion: show static mid-explode view
   const staticProgress = reducedMotion ? 0.6 : 0;
 
@@ -133,6 +136,24 @@ export function DeconstructedScene() {
     if (reducedMotion || isMobile) return;
 
     const ctx = gsap.context(() => {
+      // Heading fade-in when section scrolls into view
+      gsap.fromTo(
+        [subLabelRef.current, headingRef.current].filter(Boolean),
+        { opacity: 0, y: -14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          stagger: 0.12,
+          ease: designTokens.animation.ease.cinematic.css,
+          scrollTrigger: {
+            trigger: '#deconstructed-scene',
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+          },
+        }
+      );
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: '#deconstructed-scene',
@@ -153,7 +174,7 @@ export function DeconstructedScene() {
         if (!el) return;
         tl.fromTo(
           el,
-          { opacity: 0, x: 12 },
+          { opacity: 0, x: 14 },
           {
             opacity: 1,
             x: 0,
@@ -168,12 +189,14 @@ export function DeconstructedScene() {
     return () => ctx.revert(); // ERR-003: cleanup on unmount / Strict Mode remount
   }, [reducedMotion, isMobile]);
 
-  // ── Show labels immediately for reduced motion ──────────────────────────
+  // ── Show all overlay elements immediately for reduced motion ────────────
   useEffect(() => {
     if (!reducedMotion) return;
     labelRefs.current.forEach((el) => {
       if (el) el.style.opacity = '1';
     });
+    if (subLabelRef.current) subLabelRef.current.style.opacity = '1';
+    if (headingRef.current)  headingRef.current.style.opacity = '1';
   }, [reducedMotion]);
 
   // ── Mobile fallback ─────────────────────────────────────────────────────
@@ -185,6 +208,16 @@ export function DeconstructedScene() {
         style={{ backgroundColor: designTokens.colors.background }}
       >
         <ScrollReveal animation="fade-up">
+          <p
+            className="text-xs uppercase text-center mb-2"
+            style={{
+              color: designTokens.colors.accent.primary,
+              fontFamily: designTokens.typography.fontFamily.mono,
+              letterSpacing: designTokens.typography.letterSpacing.widest,
+            }}
+          >
+            Component Breakdown
+          </p>
           <h2
             className="text-2xl font-semibold mb-12 text-center"
             style={{
@@ -246,42 +279,64 @@ export function DeconstructedScene() {
         className="relative overflow-hidden"
         style={{ height: '100vh', backgroundColor: designTokens.colors.background }}
       >
-        {/* Section heading */}
+        {/* Section heading — fades in on scroll enter via GSAP */}
         <div
           className="absolute top-10 left-0 right-0 z-10 text-center pointer-events-none"
           aria-hidden
         >
           <p
-            className="text-xs uppercase tracking-widest mb-2"
+            ref={subLabelRef}
+            className="text-xs uppercase mb-2"
             style={{
               color: designTokens.colors.accent.primary,
               fontFamily: designTokens.typography.fontFamily.mono,
               letterSpacing: designTokens.typography.letterSpacing.widest,
+              opacity: reducedMotion ? 1 : 0,
             }}
           >
             Component Breakdown
           </p>
           <h2
+            ref={headingRef}
             className="text-3xl font-semibold"
             style={{
               color: designTokens.colors.text.primary,
               fontFamily: designTokens.typography.fontFamily.heading,
+              opacity: reducedMotion ? 1 : 0,
             }}
           >
             Built to Enterprise Spec
           </h2>
         </div>
 
-        {/* R3F Canvas */}
+        {/* R3F Canvas — dramatic lighting setup */}
         <Canvas
           camera={{ position: [0, 0.5, 6], fov: 45 }}
           shadows
           gl={{ antialias: true, alpha: true }}
           style={{ position: 'absolute', inset: 0 }}
         >
-          <ambientLight intensity={0.3} />
-          <spotLight position={[5, 5, 5]} intensity={1.5} castShadow />
-          <pointLight position={[-3, -1, -2]} intensity={0.4} />
+          {/* Subtle depth fog matching background */}
+          <fog attach="fog" args={['#0A0A0F', 8, 20]} />
+
+          {/* Ambient — slightly brighter than hero so parts read */}
+          <ambientLight intensity={0.2} />
+
+          {/* Main spotlight — warm white, dramatic key light */}
+          <spotLight
+            position={[5, 5, 5]}
+            intensity={2}
+            color="#fff8f0"
+            castShadow
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
+          />
+
+          {/* Fill light — electric indigo from left/below */}
+          <pointLight position={[-3, -1, -2]} intensity={0.5} color="#5B6EF5" />
+
+          {/* Rim light from below — cool blue underside glow */}
+          <pointLight position={[0, -3, 0]} intensity={0.3} color="#4466cc" />
 
           <Suspense fallback={null}>
             <ProgressBridge
@@ -304,31 +359,52 @@ export function DeconstructedScene() {
               ref={(el) => {
                 labelRefs.current[i] = el;
               }}
-              className="absolute flex items-center gap-2"
+              className="absolute flex items-center"
               style={{
                 top: label.top,
                 left: label.left,
                 opacity: reducedMotion ? 1 : 0,
+                willChange: 'opacity, transform',
               }}
             >
-              {/* Accent dot */}
-              <span
-                className="flex-shrink-0 rounded-full"
+              {/* Thin connecting line extending left toward the model */}
+              <div
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 40,
+                  height: 1,
                   backgroundColor: designTokens.colors.accent.primary,
-                  boxShadow: `0 0 6px ${designTokens.colors.accent.primary}`,
+                  opacity: 0.4,
+                  flexShrink: 0,
                 }}
               />
-              {/* Label */}
+              {/* Accent dot with layered glow */}
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  backgroundColor: designTokens.colors.accent.primary,
+                  boxShadow: `0 0 6px 2px rgba(91, 110, 245, 0.55), 0 0 18px rgba(91, 110, 245, 0.2)`,
+                  flexShrink: 0,
+                  marginLeft: 5,
+                  marginRight: 10,
+                  display: 'block',
+                }}
+              />
+              {/* Label text — backdrop blur for legibility over 3D */}
               <span
                 style={{
                   color: designTokens.colors.text.secondary,
                   fontFamily: designTokens.typography.fontFamily.mono,
-                  fontSize: '0.75rem',
-                  letterSpacing: '0.04em',
-                  textShadow: `0 1px 8px ${designTokens.colors.background}`,
+                  fontSize: '0.72rem',
+                  letterSpacing: '0.06em',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  backgroundColor: 'rgba(10, 10, 15, 0.7)',
+                  padding: '4px 12px',
+                  borderRadius: 4,
+                  border: `1px solid rgba(91, 110, 245, 0.18)`,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {label.text}
@@ -348,6 +424,7 @@ export function DeconstructedScene() {
             style={{
               color: designTokens.colors.text.tertiary,
               fontFamily: designTokens.typography.fontFamily.mono,
+              letterSpacing: designTokens.typography.letterSpacing.widest,
             }}
           >
             Scroll to Disassemble

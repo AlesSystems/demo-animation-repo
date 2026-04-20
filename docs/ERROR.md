@@ -21,12 +21,12 @@ Quick reference — update counts whenever entries are added or resolved.
 |---------------------------------|-------|----------|-------------|--------------------|
 | Build Errors                    | 1     | 1        | 0           | 0                  |
 | Runtime Errors                  | 1     | 0        | 0           | 1                  |
-| Animation / Performance Issues  | 1     | 1        | 0           | 0                  |
+| Animation / Performance Issues  | 2     | 2        | 0           | 0                  |
 | Styling / Layout Issues         | 0     | 0        | 0           | 0                  |
 | API / Data Fetching Errors      | 0     | 0        | 0           | 0                  |
 | Deployment Issues               | 0     | 0        | 0           | 0                  |
-| Dependency / Compatibility Issues | 0   | 0        | 0           | 0                  |
-| **TOTAL**                       | **3** | **2**    | **0**       | **1**              |
+| Dependency / Compatibility Issues | 1   | 1        | 0           | 0                  |
+| **TOTAL**                       | **5** | **4**    | **0**       | **1**              |
 
 ---
 
@@ -134,6 +134,29 @@ Errors and degradations related to GSAP, Framer Motion, Lenis, Three.js, or gene
 
 ---
 
+#### ERR-004: GSAP→R3F Bridge via setState Causes Per-Frame Re-renders
+
+- **Date:** 2025-07-15
+- **Component/Area:** Homepage Hero Scene — HeroScene.tsx scroll animation bridge
+- **Severity:** High
+- **Error Message:**
+  ```
+  [No thrown error — symptom: React profiler shows 60+ component re-renders per second during scroll,
+   causing frame drops and stutter on the 3D canvas]
+  ```
+- **Root Cause:** The original `DesktopHero` used `useState` to relay GSAP-tweened scroll values to the `HeroThreeScene` R3F canvas. Because `useState` triggers a React re-render on every GSAP tick (60fps during scroll scrub), both the parent component and the Canvas re-rendered continuously, degrading performance.
+- **Fix Applied:** Replaced the `useState` bridge with a module-level mutable object (`heroBridge` at `src/lib/animations/hero-bridge.ts`). GSAP tweens `heroBridge` directly; Three.js objects read `heroBridge` inside `useFrame` (imperative, no re-renders). Wordmark DOM updates use direct `.style` mutation.
+- **Files Modified:**
+  - `src/lib/animations/hero-bridge.ts` (new)
+  - `src/components/sections/HeroScene.tsx`
+  - `src/components/three/HeroThreeScene.tsx`
+  - `src/components/three/LaptopGLTF.tsx`
+  - `src/components/three/SceneLighting.tsx`
+- **Status:** Resolved
+- **Reported By:** Copilot Agent
+
+---
+
 ### 🎨 Styling / Layout Issues
 
 CSS, Tailwind, or layout-related errors, including visual regressions caused by animation library style injections.
@@ -170,7 +193,44 @@ Version conflicts, peer dependency warnings that cause breakage, or incompatibil
 
 ---
 
-*No entries yet.*
+#### ERR-005: react-hooks/immutability — Cannot Mutate useGLTF Returned Materials
+
+- **Date:** 2025-07-15
+- **Component/Area:** LaptopGLTF.tsx — material property overrides
+- **Severity:** Medium
+- **Error Message:**
+  ```
+  ESLint: Error: This value cannot be modified.
+  Modifying a value returned from a hook is not allowed.
+  react-hooks/immutability
+  ```
+- **Root Cause:** The `react-hooks/immutability` ESLint rule treats objects returned from hooks (including `useGLTF`'s `materials`) as immutable. Assigning to `materials.Cover_Silver.metalness = ...` inside `useEffect` violates this rule. Rule: never mutate values returned from hooks — clone or configure at construction time instead.
+- **Fix Applied:** Removed the material mutation block. The dramatic lighting rig (multi-light + night environment IBL) provides the premium metallic appearance without needing to override GLTF-returned material instances.
+- **Files Modified:**
+  - `src/components/three/LaptopGLTF.tsx`
+- **Status:** Resolved
+- **Reported By:** Copilot Agent
+
+---
+
+### ERR-004: Ref Mutation During Render Violates `react-hooks/refs` Rule
+
+- **Date:** 2025-07-15
+- **Component/Area:** ExplodedLaptop.tsx — progress ref sync pattern
+- **Severity:** Low
+- **Error Message:**
+  ```
+  Error: Cannot access refs during render
+  React refs are values that are not needed for rendering. Refs should only
+  be accessed outside of render, such as in event handlers or effects.
+  react-hooks/refs
+  ```
+- **Root Cause:** The common R3F pattern of `progressRef.current = progress;` directly in the render body (to keep a ref in sync with a prop for use in `useFrame`) mutates a ref during render. The `react-hooks/refs` ESLint rule forbids ref mutation outside of effects and event handlers.
+- **Fix Applied:** Moved the sync to `useLayoutEffect(() => { progressRef.current = progress; })`. `useLayoutEffect` runs synchronously after DOM mutations and before paint, ensuring the ref is always up-to-date before the next `useFrame` tick. Rule: **Never mutate refs in the render body — always sync them inside `useLayoutEffect` or `useEffect`.**
+- **Files Modified:**
+  - `src/components/three/ExplodedLaptop.tsx`
+- **Status:** Resolved
+- **Reported By:** Copilot Agent
 
 ---
 
