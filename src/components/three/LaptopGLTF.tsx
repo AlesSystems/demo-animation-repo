@@ -13,8 +13,7 @@ type GLTFResult = GLTF & {
     ['Silver_colour_Cover_Cover_Plane-Mesh_1']: THREE.Mesh;
     Rubber_Strip_Rubber_Stripes: THREE.Mesh;
     Keyboard_Keyboard_Plane: THREE.Mesh;
-    ['Display_Display_Plane-Mesh']: THREE.Mesh;
-    ['Display_Display_Plane-Mesh_1']: THREE.Mesh;
+    Display_Display_Plane: THREE.Mesh;
   };
   materials: {
     Cover_Silver: THREE.MeshStandardMaterial;
@@ -64,13 +63,7 @@ export function LaptopGLTF() {
       <mesh
         castShadow
         receiveShadow
-        geometry={nodes['Display_Display_Plane-Mesh'].geometry}
-        material={materials.Cover_Silver}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes['Display_Display_Plane-Mesh_1'].geometry}
+        geometry={nodes['Display_Display_Plane'].geometry}
         material={materials.Display_Glass}
       />
     </group>
