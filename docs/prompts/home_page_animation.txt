@@ -1,0 +1,25 @@
+1. The "Ales" Cinematic Storyboard (The Ideas)
+
+For a B2B hardware firm, you want to convey trust, high performance, and cutting-edge technology. Dark themes with dramatic lighting work best for this.
+
+Scene 1: The "Dark Room" Hero (Focus: Atmosphere)
+
+Visual: Pitch black screen. As the user starts scrolling, a sleek, shadowy 3D model of a high-end enterprise laptop or security camera slowly rotates into view, catching a single digital "spotlight."
+
+Animation: Text fades in smoothly from the bottom (y: 50, opacity: 0).
+
+Scene 2: The "Deconstructed" Reveal (Focus: Laptops & Cameras)
+
+Visual: As the user scrolls down, the camera/laptop model from Scene 1 "explodes" or dissects into its component parts (lens, motherboard, chassis) floating in mid-air.
+
+Animation: Scroll-linked scrubbing. The user's scroll wheel directly controls the separation of the hardware parts.
+
+Scene 3: The Network Grid (Focus: Access Points)
+
+Visual: The hardware fades out, replaced by a dark map of the TRNC. Glowing lines (representing secure networks and access points) draw themselves across the map, connecting major business hubs (Nicosia, Kyrenia, Famagusta).
+
+Animation: SVG line-drawing animation (stroke-dashoffset) tied to the scroll position.
+
+Scene 4: The Enterprise Anchor (Focus: Conversion)
+
+Visual: The map blurs, and solid, heavy typography locks into place: "Secure Your Enterprise." A sleek contact form slides up.
