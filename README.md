@@ -256,7 +256,15 @@ For project inquiries or technical questions:
 
 ## 📄 License
 
-[License information to be added]
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+
+You are free to:
+- Use this code for commercial or private purposes
+- Modify and distribute the code
+- Sublicense the software
+
+With the condition that you must:
+- Include a copy of the license and copyright notice
 
 ---
 
